@@ -17,7 +17,7 @@ public sealed class FileItem(PdfInput input, PdfInfo? info) : Observable
     public string Path => Input.Path;
     public string Name => System.IO.Path.GetFileName(Path);
     public override string ToString() => Name;
-    public string Summary => Info == null ? "Image · source unchanged" : $"{Info.PageCount} pages · {Info.Bytes / 1024d / 1024:F1} MiB{(Info.Encrypted ? " · encrypted (inspect only)" : "")}{(Info.Signed ? " · signed (editing blocked)" : "")}{(Info.Forms ? " · forms (editing blocked)" : "")}";
+    public string Summary => Info == null ? "Image · source unchanged" : $"{Info.PageCount} pages · {Info.Bytes / 1024d / 1024:F1} MiB{(Info.Encrypted ? " · encrypted (valid credentials required)" : "")}{(Info.Signed ? " · signed (editing blocked)" : "")}{(Info.Forms ? " · forms (page editing blocked)" : "")}";
 }
 public sealed class PageItem(int source, int page, string file, int rotation = 0) : Observable
 {

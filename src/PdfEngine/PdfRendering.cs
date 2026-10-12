@@ -58,8 +58,8 @@ public sealed partial class PdfService
     {
         ValidateRaster(options);
         var info = await InspectAsync(input, cancellation);
-        // Raster export would remove PDF encryption/permission restrictions; defer that to Protect/Unlock.
-        if (info.Encrypted) throw new PdfOperationException("Encrypted", "Encrypted PDFs may be previewed with a valid password, but image export is disabled until Protect/Unlock is implemented.");
+        // Raster export would remove PDF encryption/permission restrictions; require an explicit Unlock operation first.
+        if (info.Encrypted) throw new PdfOperationException("Encrypted", "Encrypted PDFs may be previewed with a valid password, but image export requires explicitly unlocking a copy with valid owner credentials first.");
         var selected = ValidateSelection(pages, info.PageCount);
         using var source = new FileStream(input.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var random = source.AsRandomAccessStream();
@@ -76,21 +76,8 @@ public sealed partial class PdfService
             try
             {
                 using var p = document.GetPage((uint)number - 1); var dimensions = PdfRendering.Dimensions(p.Size, options.Dpi);
-                var image = await PdfRendering.RenderAsync(document, number, dimensions.Width, dimensions.Height, cancellation);
-                var converted = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
-                var stride = checked(converted.PixelWidth * 4); var pixels = new byte[checked(stride * converted.PixelHeight)]; converted.CopyPixels(pixels, stride, 0);
-                image = BitmapSource.Create(converted.PixelWidth, converted.PixelHeight, options.Dpi, options.Dpi, PixelFormats.Bgra32, null, pixels, stride);
-                // One decoded page and one encoder are live at a time, never a collection of rendered pages.
-                BitmapEncoder encoder = options.Format == RasterFormat.Png ? new PngBitmapEncoder() : new JpegBitmapEncoder { QualityLevel = options.Quality };
-                encoder.Frames.Add(BitmapFrame.Create(image));
                 var effectivePolicy = policy == CollisionPolicy.Replace && (approvedReplacements == null || !approvedReplacements.Contains(target)) ? CollisionPolicy.Cancel : policy;
-                var path = SafeOutput.Commit(target, effectivePolicy, [input.Path], encoder.Save, temporary =>
-                {
-                    using var verify = File.OpenRead(temporary);
-                    var decoded = BitmapDecoder.Create(verify, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad).Frames[0];
-                    if (decoded.PixelWidth != dimensions.Width || decoded.PixelHeight != dimensions.Height)
-                        throw new PdfOperationException("Output", $"Image dimensions did not validate: actual {decoded.PixelWidth}×{decoded.PixelHeight}, expected {dimensions.Width}×{dimensions.Height}; no final image was created.");
-                }, cancellation);
+                var path = await SaveRasterPage(document, number, dimensions, options, target, effectivePolicy, input.Path, cancellation);
                 results.Add(new(path, "Success", "Rendered page; source unchanged.", new FileInfo(path).Length));
             }
             catch (OperationCanceledException) { results.Add(new(target, "Skipped", "Cancelled; this page has no partial output.")); }
@@ -100,5 +87,22 @@ public sealed partial class PdfService
         }
         return (IReadOnlyList<OutputResult>)results;
     }, cancellation);
+
+    private static async Task<string> SaveRasterPage(Windows.Data.Pdf.PdfDocument document, int number, (uint Width, uint Height) dimensions,
+        RasterOptions options, string target, CollisionPolicy policy, string source, CancellationToken cancellation)
+    {
+        // Isolate page-local WIC objects. Encode the rendered frame directly instead of
+        // copying through a converted bitmap, managed RGBA array and a second bitmap.
+        var image = await PdfRendering.RenderAsync(document, number, dimensions.Width, dimensions.Height, cancellation);
+        BitmapEncoder encoder = options.Format == RasterFormat.Png ? new PngBitmapEncoder() : new JpegBitmapEncoder { QualityLevel = options.Quality };
+        encoder.Frames.Add(BitmapFrame.Create(image));
+        return SafeOutput.Commit(target, policy, [source], stream => { encoder.Save(stream); RasterDensity.Set(stream, options.Format, options.Dpi); }, temporary =>
+        {
+            using var verify = File.OpenRead(temporary);
+            var decoded = BitmapDecoder.Create(verify, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None).Frames[0];
+            if (decoded.PixelWidth != dimensions.Width || decoded.PixelHeight != dimensions.Height)
+                throw new PdfOperationException("Output", "Exported image dimensions did not validate; no final image was created.");
+        }, cancellation);
+    }
 }
 

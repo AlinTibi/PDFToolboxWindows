@@ -19,8 +19,8 @@
      <TextBlock Text="CONVERT / EDIT" Style="{StaticResource MutedText}" FontSize="11" Margin="0,12,0,8"/>
      <Button Content="Images to PDF" Tag="Images" Click="ToolClick" HorizontalContentAlignment="Left"/>
      <Button Content="PDF to Images" Tag="Raster" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Watermark" Tag="Watermark" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Page Numbers" Tag="Numbers" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Metadata" Tag="Metadata" Click="ToolClick" HorizontalContentAlignment="Left"/>
-     <TextBlock Text="PLANNED" Style="{StaticResource MutedText}" FontSize="11" Margin="0,12,0,8"/>
-     <TextBlock Text="Protect · Unlock&#10;Compression · General batch" Style="{StaticResource MutedText}" FontSize="12" LineHeight="22" ToolTip="Not implemented; no fake processing or compression"/>
+     <TextBlock Text="SECURITY / OPTIMIZE" Style="{StaticResource MutedText}" FontSize="11" Margin="0,12,0,8"/>
+     <Button Content="Protect PDF" Tag="Protect" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Unlock PDF" Tag="Unlock" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Compress PDF" Tag="Compress" Click="ToolClick" HorizontalContentAlignment="Left"/><TextBlock Text="General batch · not implemented" Style="{StaticResource MutedText}" FontSize="12"/>
     </StackPanel></ScrollViewer>
    </DockPanel>
   </Border>
@@ -39,6 +39,9 @@
       <Button Width="238" Height="92" Tag="Extract" Click="ToolClick"><StackPanel><TextBlock Text="Extract Pages" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Keep just the pages you need" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
       <Button Width="238" Height="92" Tag="Images" Click="ToolClick"><StackPanel><TextBlock Text="Images to PDF" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="JPG, PNG and BMP in page order" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
       <Button Width="238" Height="92" Tag="Metadata" Click="ToolClick"><StackPanel><TextBlock Text="Metadata" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Review document information" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
+      <Button Width="238" Height="92" Tag="Protect" Click="ToolClick"><StackPanel><TextBlock Text="Protect PDF" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Password-protect a new copy" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
+      <Button Width="238" Height="92" Tag="Unlock" Click="ToolClick"><StackPanel><TextBlock Text="Unlock PDF" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Use valid credentials for a copy" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
+      <Button Width="238" Height="92" Tag="Compress" Click="ToolClick"><StackPanel><TextBlock Text="Compress PDF" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Lossless streams, measured savings" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
      </WrapPanel>
      <TextBlock Text="Recent files · this session only" FontSize="17" FontWeight="SemiBold" Margin="0,20,0,10"/>
      <ListBox x:Name="RecentList" ItemsSource="{Binding Recent}" MaxHeight="180" MouseDoubleClick="RecentOpen"/>
@@ -73,7 +76,7 @@
       <StackPanel x:Name="MetadataPanel" Visibility="Collapsed"><TextBlock Text="Title"/><TextBox x:Name="TitleBox" AutomationProperties.Name="Document title"/><TextBlock Text="Author"/><TextBox x:Name="AuthorBox" AutomationProperties.Name="Document author"/><TextBlock Text="Subject"/><TextBox x:Name="SubjectBox" AutomationProperties.Name="Document subject"/><TextBlock Text="Keywords"/><TextBox x:Name="KeywordsBox" AutomationProperties.Name="Document keywords"/><TextBlock Text="Creator"/><TextBox x:Name="CreatorBox" AutomationProperties.Name="Document creator"/><TextBlock Text="Producer (library-controlled on save)"/><TextBox x:Name="ProducerBox" AutomationProperties.Name="Document producer" IsReadOnly="True"/><Button Content="Clear editable fields" Click="ClearMetadata"/><TextBlock Text="Document information only. Existing XMP/content may retain information. This is not secure sanitization or an anonymity guarantee." Style="{StaticResource MutedText}" FontSize="12"/></StackPanel>
       <TextBlock Text="Existing output filename" Margin="0,20,0,0"/><ComboBox x:Name="CollisionBox" AutomationProperties.Name="Output filename collision policy" SelectedIndex="0"><ComboBoxItem Content="Rename automatically"/><ComboBoxItem Content="Cancel / refuse overwrite"/><ComboBoxItem Content="Replace after confirmation"/></ComboBox>
       <Button Content="Export a copy" Click="ExportClick" Style="{StaticResource Primary}" AutomationProperties.Name="Export a copy"/>
-      <TextBlock Text="Sources are never overwritten in this milestone. Page operations may discard bookmarks or other document-level structures. Signed PDFs and interactive forms are not edited." Style="{StaticResource MutedText}" FontSize="12" Margin="0,4,0,0"/>
+      <TextBlock Text="Sources are never overwritten in this milestone. Page operations may discard bookmarks or other document-level structures. Signed PDFs are not rewritten. Page-editing tools refuse interactive forms; lossless compression and security operations retain them." Style="{StaticResource MutedText}" FontSize="12" Margin="0,4,0,0"/>
      </StackPanel></ScrollViewer>
     </Border>
    </Grid>

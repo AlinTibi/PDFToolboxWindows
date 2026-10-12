@@ -10,6 +10,9 @@ public sealed class ThumbnailService
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly Dictionary<string, BitmapSource> cache = [];
     private readonly Queue<string> order = new();
+    public const long MaxCachedBytes = 24 * 1024 * 1024;
+    public long CachedBytes { get; private set; }
+    private static long Bytes(BitmapSource image) => (long)image.PixelWidth * image.PixelHeight * Math.Max(4, (image.Format.BitsPerPixel + 7) / 8);
     public int CachedCount => cache.Count;
     public async Task<BitmapSource> GetAsync(PdfInput input, int page, CancellationToken cancellation = default)
         => await PreviewAsync(input, page, 240, "source", null, cancellation);
@@ -33,11 +36,16 @@ public sealed class ThumbnailService
             if (renderedPage < 1 || renderedPage > document.PageCount) throw new PdfOperationException("Range", "Preview page is out of range.");
             using var pdfPage = document.GetPage((uint)renderedPage - 1);
             var ratio = pdfPage.Size.Height / Math.Max(1, pdfPage.Size.Width);
+            if (width * ratio > 1600) width = (uint)Math.Max(1, Math.Floor(1600 / ratio));
             var height = (uint)Math.Clamp(width * ratio, 1, 1600);
             var image = await PdfRendering.RenderAsync(document, renderedPage, width, height, cancellation);
             cancellation.ThrowIfCancellationRequested();
-            if (cache.Count >= 16) cache.Remove(order.Dequeue());
+            while (cache.Count > 0 && (cache.Count >= 16 || CachedBytes + Bytes(image) > MaxCachedBytes))
+            {
+                var oldest = order.Dequeue(); CachedBytes -= Bytes(cache[oldest]); cache.Remove(oldest);
+            }
             cache.Add(key, image); order.Enqueue(key);
+            CachedBytes += Bytes(image);
             return image;
         }
         finally { gate.Release(); }
@@ -45,6 +53,6 @@ public sealed class ThumbnailService
     public async Task ClearAsync()
     {
         await gate.WaitAsync();
-        try { cache.Clear(); order.Clear(); } finally { gate.Release(); }
+        try { cache.Clear(); order.Clear(); CachedBytes = 0; } finally { gate.Release(); }
     }
 }

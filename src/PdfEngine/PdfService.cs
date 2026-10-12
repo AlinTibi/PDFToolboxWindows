@@ -48,7 +48,7 @@ public sealed partial class PdfService
         if (Signed(document)) throw new PdfOperationException("Signed", "Signed PDFs are not edited in this milestone; rewriting would invalidate their signatures.");
         if (Forms(document)) throw new PdfOperationException("Forms", "Interactive forms are not supported for editing in this milestone.");
         if (opened.Encrypted)
-            throw new PdfOperationException("Encrypted", "Encrypted PDFs can be inspected with a valid password. Editing them is deferred until the Protect/Unlock milestone; encryption is never removed silently.");
+            throw new PdfOperationException("Encrypted", "Encrypted PDFs can be inspected with a valid password. Use Unlock with valid owner credentials to create an unencrypted copy before editing; encryption is never removed silently.");
     }
     public Task<PdfInfo> InspectAsync(PdfInput input, CancellationToken cancellation = default) => Task.Run(() =>
     {
