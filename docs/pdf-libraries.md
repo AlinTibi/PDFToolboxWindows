@@ -4,8 +4,8 @@ Reviewed before implementation. The Windows edition does not reuse Android adver
 
 | Component | Purpose | License / distribution |
 | --- | --- | --- |
-| PDFsharp-WPF 6.2.4 (empira) | Read/import, merge, page selection/reordering/rotation, images and document information | MIT. Preserve its copyright/license in THIRD-PARTY-NOTICES.txt. No paid runtime required. |
-| Windows.Data.Pdf | On-demand raster thumbnails | Windows operating-system API, supplied by supported Windows installations. Not an application-bundled PDF engine; use is subject to the user's Windows license. |
+| PDFsharp-WPF 6.2.4 (empira) | Read/import, page operations, image import, metadata and appended watermark/number content | MIT. Preserve its copyright/license in THIRD-PARTY-NOTICES.txt. No paid runtime required. |
+| Windows.Data.Pdf | On-demand previews and PNG/JPEG page export | Windows operating-system API, supplied by supported Windows installations. Not an application-bundled PDF engine; use is subject to the user's Windows license. |
 | .NET 8 and WPF | Application/runtime and image decoding | MIT for the open-source runtime/WPF implementations; distributed runtime notices accompany the self-contained development build. |
 
 Primary references:
@@ -32,5 +32,7 @@ Runtime package license metadata was checked after restore:
 CI may select a later serviced .NET 8 runtime; its notices must accompany any future distributed build. Full package/runtime notices are preserved in THIRD-PARTY-NOTICES.txt. Development tests use xUnit (Apache-2.0) and Microsoft.NET.Test.Sdk (MIT); those tools are not distributed with the application. The icon generation helper uses Pillow (HPND), development-only.
 
 No GPL, AGPL, non-commercial-only or paid-runtime PDF dependency is used. No PDFium, Ghostscript, iText or commercial SDK is bundled. The dependency vulnerability audit currently reports no vulnerable packages.
+
+The rendering/overlay milestone adds **no NuGet dependencies**. WPF's PNG/JPEG codecs encode images and image-watermark alpha; Windows fonts are accessed locally through the existing WPF PDFsharp package. No font package or PDF rasterizer is downloaded. Windows render-option dimensions are DIPs; output is normalized to requested pixel dimensions and assigned the selected DPI. Reference: [DestinationWidth](https://learn.microsoft.com/en-us/uwp/api/windows.data.pdf.pdfpagerenderoptions.destinationwidth).
 
 PDFsharp is not a full preservation/sanitization engine. Rewritten PDFs may lose document-level features; digitally signed PDFs are refused by the MVP to avoid invalidating signatures silently. Metadata editing is not secure sanitization and does not guarantee anonymity. Reliable compression has not been validated and remains disabled.

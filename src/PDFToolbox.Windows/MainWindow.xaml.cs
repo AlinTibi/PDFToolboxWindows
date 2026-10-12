@@ -26,8 +26,19 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent(); DataContext = vm;
-        SizeChanged += (_, _) => FileQueueRow.Height = new GridLength(ActualHeight < 800 ? 76 : 150);
+        InitializeComponent(); DataContext = vm; SetupFeatures();
+        Width = Math.Min(Width, SystemParameters.WorkArea.Width); Height = Math.Min(Height, SystemParameters.WorkArea.Height);
+        SizeChanged += (_, _) =>
+        {
+            FileQueueRow.Height = new GridLength(ActualHeight < 620 ? 54 : ActualHeight < 800 || tool is "Watermark" or "Numbers" ? 76 : 150);
+            SideColumn.Width = new GridLength(ActualWidth < 1100 ? 156 : 208);
+            OptionsColumn.Width = new GridLength(ActualWidth < 1100 ? 260 : 300);
+            MainContent.Margin = ActualWidth < 1100 ? new Thickness(12, 12, 12, 10) : new Thickness(26, 22, 26, 18);
+            Heading.FontSize = ActualWidth < 1100 ? 22 : 28;
+            LeftScroll.VerticalScrollBarVisibility = ActualHeight < 620 ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
+            LeftContent.Height = ActualHeight < 620 ? 360 : double.NaN;
+            ResultsList.MaxHeight = ActualHeight < 620 ? 50 : 110;
+        };
         Loaded += async (_, _) =>
         {
             var paths = Environment.GetCommandLineArgs().Skip(1).ToArray();
@@ -56,9 +67,9 @@ public partial class MainWindow : Window
             if (MessageBox.Show(this, "Switching between PDFs and images clears the current workspace, without changing any files. Continue?", "Change workspace", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
             ClearFiles();
         }
-        tool = value; HomePanel.Visibility = value == "Home" ? Visibility.Visible : Visibility.Collapsed;
+        tool = value; ResultsPanel.Visibility = Visibility.Collapsed; HomePanel.Visibility = value == "Home" ? Visibility.Visible : Visibility.Collapsed;
         WorkspacePanel.Visibility = value == "Home" ? Visibility.Collapsed : Visibility.Visible;
-        Heading.Text = value switch { "Home" => "PDF tools that stay on your device", "Merge" => "Merge PDFs", "Split" => "Split PDF", "Organize" => "Organize Pages", "Extract" => "Extract Pages", "Rotate" => "Rotate Pages", "Images" => "Images to PDF", _ => "Document metadata" };
+        Heading.Text = value switch { "Home" => "PDF tools that stay on your device", "Merge" => "Merge PDFs", "Split" => "Split PDF", "Organize" => "Organize Pages", "Extract" => "Extract Pages", "Rotate" => "Rotate Pages", "Images" => "Images to PDF", "Raster" => "PDF to Images", "Watermark" => "Watermark", "Numbers" => "Page Numbers", _ => "Document metadata" };
         Subheading.Text = value == "Home" ? "Open. Arrange. Export a copy. Your original files stay intact." : "Local processing · review your choices · export a new copy";
         RangePanel.Visibility = value is "Split" or "Extract" or "Rotate" ? Visibility.Visible : Visibility.Collapsed;
         SplitOptions.Visibility = value == "Split" ? Visibility.Visible : Visibility.Collapsed;
@@ -79,7 +90,7 @@ public partial class MainWindow : Window
             "Images" => "JPG/JPEG, PNG and BMP. Reorder files before export. Fit preserves the whole image; Fill deliberately crops edges. The selected source image is previewed below.",
             _ => "Read and edit document information in a new copy. Producer is controlled by the PDF library. Existing XMP, attachments and page content are not sanitized."
         };
-        ClearError(); RefreshSelected();
+        SetFeatureTool(value); ClearError(); RefreshSelected();
     }
     private void ToolClick(object sender, RoutedEventArgs e) => SetTool((string)((Button)sender).Tag);
     private async void OpenClick(object sender, RoutedEventArgs e)
@@ -151,13 +162,14 @@ public partial class MainWindow : Window
         {
             previewCancellation.Cancel(); previewCancellation.Dispose(); previewCancellation = new(); vm.Pages.Clear(); undo.Clear();
             var file = FilesList.SelectedItem as FileItem ?? vm.Files.FirstOrDefault();
-            if (file == null) return;
+            if (file == null) { featurePreviewCancellation.Cancel(); overlayPreview.Source = null; previewMessage.Text = "Open a PDF to preview."; return; }
             if (file.Info is { } info)
             {
                 var index = vm.Files.IndexOf(file);
                 for (var page = 1; page <= info.PageCount; page++) vm.Pages.Add(new(index, page, file.Name));
                 TitleBox.Text = info.Metadata.Title; AuthorBox.Text = info.Metadata.Author; SubjectBox.Text = info.Metadata.Subject; KeywordsBox.Text = info.Metadata.Keywords;
                 CreatorBox.Text = info.Metadata.Creator; ProducerBox.Text = info.Metadata.Producer;
+                QueueFeaturePreview();
             }
             else
             {
@@ -193,8 +205,10 @@ public partial class MainWindow : Window
     }
     private void PageDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
+        if (e.OldValue is PageItem previous) previous.Thumbnail = null;
         if (sender is FrameworkElement { IsLoaded: true }) PageLoaded(sender, new RoutedEventArgs());
     }
+    private void PageUnloaded(object sender, RoutedEventArgs e) { if (((FrameworkElement)sender).DataContext is PageItem page) page.Thumbnail = null; }
     private void Snapshot() { undo.Push(vm.Pages.Select(x => x.Selection).ToArray()); if (undo.Count > 50) { var keep = undo.Take(50).Reverse().ToArray(); undo.Clear(); foreach (var state in keep) undo.Push(state); } }
     private void Restore(IEnumerable<PageSelection> selections)
     {
@@ -221,7 +235,7 @@ public partial class MainWindow : Window
     private void FileDown(object sender, RoutedEventArgs e) => MoveFile(1);
     private void MoveFile(int delta) { if (FilesList.SelectedItem is not FileItem file) return; var i = vm.Files.IndexOf(file); if (i + delta < 0 || i + delta >= vm.Files.Count) return; vm.Files.Move(i, i + delta); FilesList.SelectedItem = file; RefreshSelected(); }
     private void RemoveFile(object sender, RoutedEventArgs e) { if (FilesList.SelectedItem is FileItem file) vm.Files.Remove(file); FilesList.SelectedIndex = vm.Files.Count > 0 ? 0 : -1; RefreshSelected(); }
-    private async void ClearFiles() { previewCancellation.Cancel(); vm.Files.Clear(); vm.Pages.Clear(); undo.Clear(); await thumbnails.ClearAsync(); ImagePreview.Source = null; }
+    private async void ClearFiles() { previewCancellation.Cancel(); featurePreviewCancellation.Cancel(); overlayPreview.Source = null; vm.Files.Clear(); vm.Pages.Clear(); undo.Clear(); await thumbnails.ClearAsync(); ImagePreview.Source = null; }
     private void ClearWorkspace(object sender, RoutedEventArgs e) => ClearFiles();
     private void ClearMetadata(object sender, RoutedEventArgs e) { TitleBox.Clear(); AuthorBox.Clear(); SubjectBox.Clear(); KeywordsBox.Clear(); CreatorBox.Clear(); }
     private async void RecentOpen(object sender, MouseButtonEventArgs e) { if (RecentList.SelectedItem is string path) await OpenPaths([path]); }
@@ -266,6 +280,7 @@ public partial class MainWindow : Window
         ClearError();
         if (tool == "Home" || vm.Files.Count == 0) { Error(new PdfOperationException("Empty", "Choose a tool and open input files first.")); return; }
         var file = FilesList.SelectedItem as FileItem ?? vm.Files[0];
+        if (tool is "Raster" or "Watermark" or "Numbers") { await ExportFeature(file); return; }
         var policy = (CollisionPolicy)new[] { 1, 0, 2 }[CollisionBox.SelectedIndex];
         var multiple = tool == "Split" || (tool == "Extract" && ExtractSeparate.IsChecked == true);
         string output;
@@ -339,10 +354,11 @@ public partial class MainWindow : Window
         var values = light ? new[] { "#F3F6FA", "#FFFFFF", "#E8EFF6", "#182A40", "#52657D", "#C9D7E5", "#77CCC1", "#8E2A16" } : new[] { "#0D141F", "#152130", "#1C2C3E", "#EDF4FC", "#A4B7CE", "#2B3F55", "#87D8D0", "#FFBCAC" };
         var keys = new[] { "Background", "Surface", "SurfaceAlt", "Text", "Muted", "Line", "Accent", "Error" };
         for (var i = 0; i < keys.Length; i++) Application.Current.Resources[keys[i]] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(values[i]));
+        Application.Current.Resources["Focus"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(light ? "#24695E" : "#87D8D0"));
     }
     private void WindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         if (vm.Busy) { operation?.Cancel(); e.Cancel = true; vm.Status = "Cancellation requested. Wait for the current parsing/save step, then close."; return; }
-        previewCancellation.Cancel(); vm.Files.Clear(); vm.Pages.Clear(); vm.Recent.Clear();
+        previewCancellation.Cancel(); featurePreviewCancellation.Cancel(); previewTimer.Stop(); vm.Files.Clear(); vm.Pages.Clear(); vm.Recent.Clear();
     }
 }
