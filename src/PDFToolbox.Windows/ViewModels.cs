@@ -26,7 +26,8 @@ public sealed class PageItem(int source, int page, string file, int rotation = 0
     public int Page { get; } = page;
     public string Label => $"Page {Page} · {file}";
     public override string ToString() => Label;
-    public string PreviewNote { get; set; } = "Preview loads when visible";
+    private string previewNote = "Preview loads when visible";
+    public string PreviewNote { get => previewNote; set { previewNote = value; Changed(); } }
     private int rotation = rotation;
     public int Rotation { get => rotation; set { rotation = value; Changed(); } }
     private BitmapSource? thumbnail;

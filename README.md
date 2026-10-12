@@ -4,6 +4,8 @@
 
 An independent ALMARFELD Windows desktop project. Open PDFs, review page choices and export a new copy, entirely on your computer. This is the first desktop development milestone, not a published release.
 
+![Real Windows development build with synthetic pages](docs/screenshots/organize.png)
+
 ## Working tools
 
 | Tool | Current behavior |
@@ -52,6 +54,6 @@ dotnet test PDFToolboxWindows.sln -c Release --no-build
 dotnet publish src/PDFToolbox.Windows -c Release --no-restore -o artifacts/windows/PDFToolbox
 ```
 
-Do not publish development artifacts as a release without completing the release checks. A real application screenshot will be added after Windows validation. Architecture and validation details: [architecture](docs/architecture.md), [testing](docs/testing.md), [dependencies/licenses](docs/pdf-libraries.md).
+Do not publish development artifacts as a release without completing the release checks. The screenshot above is captured from the actual Windows application using synthetic input, with no cursor or personal paths. Architecture and validation details: [architecture](docs/architecture.md), [testing](docs/testing.md), [dependencies/licenses](docs/pdf-libraries.md).
 
 MIT. [ALMARFELD](https://almarfeld.com/) · [Support](https://almarfeld.com/support/)

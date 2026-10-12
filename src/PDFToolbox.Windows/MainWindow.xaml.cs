@@ -122,7 +122,7 @@ public partial class MainWindow : Window
                 vm.Recent.Remove(path); vm.Recent.Insert(0, path); if (vm.Recent.Count > 8) vm.Recent.RemoveAt(8);
                 vm.Progress = 100d * (i + 1) / paths.Length;
             }
-            vm.Status = $"{vm.Files.Count} files loaded. Sources are unchanged.";
+            vm.Status = $"{vm.Files.Count} {(vm.Files.Count == 1 ? "file" : "files")} loaded. Sources are unchanged.";
         }
         catch (Exception exception) { Error(exception); }
         finally
@@ -187,9 +187,13 @@ public partial class MainWindow : Window
     {
         if (((FrameworkElement)sender).DataContext is not PageItem page || page.Thumbnail != null || page.Source >= vm.Files.Count) return;
         var token = previewCancellation.Token; var input = vm.Files[page.Source].Input;
-        try { page.Thumbnail = await thumbnails.GetAsync(input, page.Page, token); }
+        try { page.Thumbnail = await thumbnails.GetAsync(input, page.Page, token); page.PreviewNote = "Page thumbnail · drag to reorder"; }
         catch (OperationCanceledException) { }
-        catch { vm.Status = "Some page previews are unavailable. Export validation is independent of thumbnails."; }
+        catch { page.PreviewNote = "Preview unavailable; source retained"; vm.Status = "Some page previews are unavailable. Export validation is independent of thumbnails."; }
+    }
+    private void PageDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (sender is FrameworkElement { IsLoaded: true }) PageLoaded(sender, new RoutedEventArgs());
     }
     private void Snapshot() { undo.Push(vm.Pages.Select(x => x.Selection).ToArray()); if (undo.Count > 50) { var keep = undo.Take(50).Reverse().ToArray(); undo.Clear(); foreach (var state in keep) undo.Push(state); } }
     private void Restore(IEnumerable<PageSelection> selections)
@@ -246,7 +250,14 @@ public partial class MainWindow : Window
         if (vm.Busy || tool != "Organize" || e.Data.GetData("PDFToolbox.PageOrder") is not PageItem page || ContainerItem<PageItem>(e.OriginalSource as DependencyObject) is not { } target) return;
         var from = vm.Pages.IndexOf(page); var to = vm.Pages.IndexOf(target); if (from < 0 || to < 0) return; Snapshot(); vm.Pages.Move(from, to); PagesList.SelectedItem = page;
     }
-    private void FileDragOver(object sender, DragEventArgs e) { e.Effects = !vm.Busy && (e.Data.GetDataPresent(DataFormats.FileDrop) || e.Data.GetDataPresent("PDFToolbox.PageOrder") || e.Data.GetDataPresent("PDFToolbox.FileOrder")) ? DragDropEffects.Copy : DragDropEffects.None; e.Handled = true; }
+    private void FileDragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = vm.Busy ? DragDropEffects.None
+            : e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy
+            : e.Data.GetDataPresent("PDFToolbox.PageOrder") || e.Data.GetDataPresent("PDFToolbox.FileOrder") ? DragDropEffects.Move
+            : DragDropEffects.None;
+        e.Handled = true;
+    }
     private async void FileDrop(object sender, DragEventArgs e) { if (vm.Busy || !e.Data.GetDataPresent(DataFormats.FileDrop)) return; e.Handled = true; if (e.Data.GetData(DataFormats.FileDrop) is string[] paths) await OpenPaths(paths); }
 
     private async void ExportClick(object sender, RoutedEventArgs e)
