@@ -7,7 +7,7 @@ using System.Windows.Media.Imaging;
 
 namespace Almarfeld.PdfEngine;
 
-public sealed class PdfService
+public sealed partial class PdfService
 {
     public const long MaxInputBytes = 256L * 1024 * 1024;
     public const int MaxInputPages = 5000, MaxOutputPages = 10000, MaxImages = 500;

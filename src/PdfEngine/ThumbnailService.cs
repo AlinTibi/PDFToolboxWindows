@@ -12,24 +12,30 @@ public sealed class ThumbnailService
     private readonly Queue<string> order = new();
     public int CachedCount => cache.Count;
     public async Task<BitmapSource> GetAsync(PdfInput input, int page, CancellationToken cancellation = default)
+        => await PreviewAsync(input, page, 240, "source", null, cancellation);
+
+    public async Task<BitmapSource> PreviewAsync(PdfInput input, int page, uint width, string variant,
+        Func<CancellationToken, Task<byte[]>>? modifiedPdf = null, CancellationToken cancellation = default)
     {
         await gate.WaitAsync(cancellation);
         try
         {
+            cancellation.ThrowIfCancellationRequested();
             var info = new FileInfo(input.Path);
-            var key = $"{input.Path}|{info.Length}|{info.LastWriteTimeUtc.Ticks}|{page}";
+            width = Math.Clamp(width, 120u, 1200u);
+            var key = $"{input.SessionId}|{input.Path}|{info.Length}|{info.LastWriteTimeUtc.Ticks}|{page}|{width}|{variant}";
             if (cache.TryGetValue(key, out var existing)) return existing;
-            using var file = new FileStream(input.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using Stream file = modifiedPdf == null ? new FileStream(input.Path, FileMode.Open, FileAccess.Read, FileShare.Read)
+                : new MemoryStream(await modifiedPdf(cancellation));
             using var random = file.AsRandomAccessStream();
-            var document = await PdfDocument.LoadFromStreamAsync(random, input.Password ?? "").AsTask(cancellation);
-            if (page < 1 || page > document.PageCount) throw new PdfOperationException("Range", "Preview page is out of range.");
-            using var pdfPage = document.GetPage((uint)page - 1);
-            using var output = new InMemoryRandomAccessStream();
+            var document = await PdfDocument.LoadFromStreamAsync(random, modifiedPdf == null ? input.Password ?? "" : "").AsTask(cancellation);
+            var renderedPage = modifiedPdf == null ? page : 1;
+            if (renderedPage < 1 || renderedPage > document.PageCount) throw new PdfOperationException("Range", "Preview page is out of range.");
+            using var pdfPage = document.GetPage((uint)renderedPage - 1);
             var ratio = pdfPage.Size.Height / Math.Max(1, pdfPage.Size.Width);
-            await pdfPage.RenderToStreamAsync(output, new PdfPageRenderOptions { DestinationWidth = 240, DestinationHeight = (uint)Math.Clamp(240 * ratio, 1, 480) }).AsTask(cancellation);
-            output.Seek(0);
-            using var stream = output.AsStreamForRead();
-            var image = new BitmapImage(); image.BeginInit(); image.CacheOption = BitmapCacheOption.OnLoad; image.StreamSource = stream; image.EndInit(); image.Freeze();
+            var height = (uint)Math.Clamp(width * ratio, 1, 1600);
+            var image = await PdfRendering.RenderAsync(document, renderedPage, width, height, cancellation);
+            cancellation.ThrowIfCancellationRequested();
             if (cache.Count >= 16) cache.Remove(order.Dequeue());
             cache.Add(key, image); order.Enqueue(key);
             return image;
