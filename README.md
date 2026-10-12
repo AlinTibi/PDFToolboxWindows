@@ -2,9 +2,11 @@
 
 **PDF tools that stay on your device**
 
-An independent ALMARFELD Windows desktop project. Open PDFs, review page choices and export a new copy, entirely on your computer. This is a desktop development build, not a published release.
+An independent ALMARFELD Windows desktop project. Open PDFs, review page choices and export a new copy, entirely on your computer. PDF Toolbox v1.0.0 runs from a self-contained portable ZIP.
 
-![Real Windows development build with synthetic pages](docs/screenshots/organize.png)
+![PDF Toolbox for Windows with synthetic pages](docs/screenshots/organize.png)
+
+Actual Release screenshots: [Home](docs/screenshots/home.png) · [Watermark preview](docs/screenshots/watermark.png) · [Lossless compression](docs/screenshots/compress.png).
 
 ## Working tools
 
@@ -34,9 +36,9 @@ Watermark and numbering are added as PDF content; the whole document is not rast
 
 ## Requirements and first run
 
-Windows 10 **version 2004 or later**, or Windows 11, x64. The self-contained development build includes the .NET 8 runtime. It does **not** require WebView2. Windows supplies the PDF preview and image-export renderer.
+Windows 10 **version 2004 or later**, or Windows 11, x64. The self-contained portable build includes the .NET 8 runtime. It does **not** require WebView2. Windows supplies the PDF preview and image-export renderer.
 
-Extract the entire build folder and keep its adjacent files together. Run `PDFToolbox.exe`. There is no installer, automatic updater or automatic dependency download. The Windows binary is not Authenticode signed; Windows may show a reputation warning. Do not disable Windows security.
+Extract the entire ZIP and keep its adjacent files together. Run `PDFToolbox.exe`. There is no installer, automatic updater or automatic dependency download. The Windows binary is not Authenticode signed; Windows may show a reputation warning. Do not disable Windows security.
 
 Use Open files / Ctrl+O, or drop supported files onto the window. Select a tool, review options and choose Export copy / Ctrl+S. Organize changes affect only the export plan. Recent files and passwords remain session-only; closing the application clears them.
 
@@ -64,9 +66,10 @@ Install a .NET SDK supporting .NET 8 and Windows desktop/WinRT targeting (CI use
 dotnet restore PDFToolboxWindows.sln --locked-mode
 dotnet build PDFToolboxWindows.sln -c Release --no-restore
 dotnet test PDFToolboxWindows.sln -c Release --no-build
-dotnet publish src/PDFToolbox.Windows -c Release --no-restore -o artifacts/windows/PDFToolbox
+./tools/publish.ps1
+./tools/Validate-Package.ps1
 ```
 
-Do not publish development artifacts as a release without completing the release checks. The screenshot above is captured from the actual Windows application using synthetic input, with no cursor or personal paths. Architecture and validation details: [architecture](docs/architecture.md), [testing](docs/testing.md), [dependencies/licenses](docs/pdf-libraries.md).
+Release validation and environment limitations are recorded in [testing](docs/testing.md). The screenshot above is captured from the actual Windows application using synthetic input, with no cursor or personal paths. Architecture and validation details: [architecture](docs/architecture.md), [testing](docs/testing.md), [dependencies/licenses](docs/pdf-libraries.md).
 
 MIT. [ALMARFELD](https://almarfeld.com/) · [Support](https://almarfeld.com/support/)
