@@ -3,6 +3,10 @@ $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
 try {
+ # Discard assemblies from an earlier debug-symbol build before publishing.
+ # Otherwise incremental WPF builds can retain local PDB paths in the DLLs.
+ dotnet clean src/PDFToolbox.Windows -c Release --verbosity quiet
+ if($LASTEXITCODE) {throw 'Release clean failed.'}
  dotnet publish src/PDFToolbox.Windows -c Release --no-restore -p:DebugType=None -p:DebugSymbols=false -o $Output
  if($LASTEXITCODE) {throw 'Publish failed.'}
  foreach($file in @('LICENSE','THIRD-PARTY-NOTICES.txt','Windows-SDK-License.rtf')) {
