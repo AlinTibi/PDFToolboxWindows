@@ -1,0 +1,14 @@
+name: Bug report
+description: Report a reproducible problem using synthetic data.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and steps to reproduce
+      description: Include the tool, Windows version, expected and actual results. No confidential files or passwords.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Synthetic reproduction and error message

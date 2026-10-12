@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - run: dotnet restore PDFToolboxWindows.sln --locked-mode
+      - run: dotnet build PDFToolboxWindows.sln -c Release --no-restore
+      - run: dotnet test PDFToolboxWindows.sln -c Release --no-build --logger trx
+      - run: ./tools/publish.ps1
+        shell: pwsh
+      - name: Dependency audit
+        shell: pwsh
+        run: |
+          dotnet list PDFToolboxWindows.sln package --vulnerable --include-transitive --format json > audit.json
+          if ($LASTEXITCODE) { throw 'Dependency audit failed.' }
+          $audit = Get-Content audit.json -Raw | ConvertFrom-Json
+          foreach ($project in $audit.projects) {
+            foreach ($framework in $project.frameworks) {
+              foreach ($package in @($framework.topLevelPackages) + @($framework.transitivePackages)) {
+                foreach ($issue in $package.vulnerabilities) {
+                  if ($issue.severity -in @('High','Critical')) { throw "Vulnerable dependency: $($package.id)" }
+                }
+              }
+            }
+          }

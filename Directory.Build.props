@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion><Deterministic>true</Deterministic>
+    <Version>0.1.0</Version><Authors>ALMARFELD</Authors><Company>ALMARFELD</Company>
+    <Product>PDF Toolbox</Product><Description>PDF tools that stay on your device</Description>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup><Using Include="System.IO" /></ItemGroup>
+</Project>

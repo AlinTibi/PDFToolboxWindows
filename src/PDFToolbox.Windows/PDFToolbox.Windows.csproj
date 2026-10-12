@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><UseWPF>true</UseWPF>
+    <AssemblyName>PDFToolbox</AssemblyName><ApplicationIcon>Assets/App.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier><SelfContained>true</SelfContained>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+  </PropertyGroup>
+  <ItemGroup><ProjectReference Include="../PdfEngine/PdfEngine.csproj" /><Resource Include="Assets/App.ico" /></ItemGroup>
+</Project>
