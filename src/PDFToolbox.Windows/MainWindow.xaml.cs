@@ -26,7 +26,7 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent(); DataContext = vm; SetupFeatures();
+        InitializeComponent(); DataContext = vm; SetupFeatures(); SetupSecurity();
         Width = Math.Min(Width, SystemParameters.WorkArea.Width); Height = Math.Min(Height, SystemParameters.WorkArea.Height);
         SizeChanged += (_, _) =>
         {
@@ -69,7 +69,7 @@ public partial class MainWindow : Window
         }
         tool = value; ResultsPanel.Visibility = Visibility.Collapsed; HomePanel.Visibility = value == "Home" ? Visibility.Visible : Visibility.Collapsed;
         WorkspacePanel.Visibility = value == "Home" ? Visibility.Collapsed : Visibility.Visible;
-        Heading.Text = value switch { "Home" => "PDF tools that stay on your device", "Merge" => "Merge PDFs", "Split" => "Split PDF", "Organize" => "Organize Pages", "Extract" => "Extract Pages", "Rotate" => "Rotate Pages", "Images" => "Images to PDF", "Raster" => "PDF to Images", "Watermark" => "Watermark", "Numbers" => "Page Numbers", _ => "Document metadata" };
+        Heading.Text = value switch { "Home" => "PDF tools that stay on your device", "Merge" => "Merge PDFs", "Split" => "Split PDF", "Organize" => "Organize Pages", "Extract" => "Extract Pages", "Rotate" => "Rotate Pages", "Images" => "Images to PDF", "Raster" => "PDF to Images", "Watermark" => "Watermark", "Numbers" => "Page Numbers", "Protect" => "Protect PDF", "Unlock" => "Unlock PDF", "Compress" => "Compress PDF", _ => "Document metadata" };
         Subheading.Text = value == "Home" ? "Open. Arrange. Export a copy. Your original files stay intact." : "Local processing · review your choices · export a new copy";
         RangePanel.Visibility = value is "Split" or "Extract" or "Rotate" ? Visibility.Visible : Visibility.Collapsed;
         SplitOptions.Visibility = value == "Split" ? Visibility.Visible : Visibility.Collapsed;
@@ -90,7 +90,7 @@ public partial class MainWindow : Window
             "Images" => "JPG/JPEG, PNG and BMP. Reorder files before export. Fit preserves the whole image; Fill deliberately crops edges. The selected source image is previewed below.",
             _ => "Read and edit document information in a new copy. Producer is controlled by the PDF library. Existing XMP, attachments and page content are not sanitized."
         };
-        SetFeatureTool(value); ClearError(); RefreshSelected();
+        SetFeatureTool(value); SetSecurityTool(value); ClearError(); RefreshSelected();
     }
     private void ToolClick(object sender, RoutedEventArgs e) => SetTool((string)((Button)sender).Tag);
     private async void OpenClick(object sender, RoutedEventArgs e)
@@ -280,6 +280,7 @@ public partial class MainWindow : Window
         ClearError();
         if (tool == "Home" || vm.Files.Count == 0) { Error(new PdfOperationException("Empty", "Choose a tool and open input files first.")); return; }
         var file = FilesList.SelectedItem as FileItem ?? vm.Files[0];
+        if (tool is "Protect" or "Unlock" or "Compress") { await ExportSecurity(file); return; }
         if (tool is "Raster" or "Watermark" or "Numbers") { await ExportFeature(file); return; }
         var policy = (CollisionPolicy)new[] { 1, 0, 2 }[CollisionBox.SelectedIndex];
         var multiple = tool == "Split" || (tool == "Extract" && ExtractSeparate.IsChecked == true);
