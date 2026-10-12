@@ -37,7 +37,7 @@ The real screenshot in `docs/screenshots/organize.png` is a crop of the native a
 
 ## Security, lossless compression and memory milestone — 2026-10-12
 
-- **118 automated cases passed**, zero failed/skipped (93 previous + 25 new). Protect/Unlock verify AESV2, V=4/R=4, correct/wrong/missing credentials, owner restriction enforcement, confirmation/empty/non-ASCII validation, decoded page content, geometry/forms, encryption state and source hashes. Compression tests cover actual byte counts, decoded page streams, title, rotation, annotation counts/forms, refusal of encrypted input, no-reduction output suppression, cancellation during work, locked/existing output, Unicode/long paths and simulated write failure cleanup. Preview tests exercise 120 pages, cache eviction, estimated 24 MiB/16-entry bounds, ten reopen/clear cycles and cancellation without cached output.
+- **119 automated cases passed**, zero failed/skipped (93 previous + 26 new). Protect/Unlock verify AESV2, V=4/R=4, correct/wrong/missing credentials, owner restriction enforcement, confirmation/empty/non-ASCII validation, decoded page content, geometry/forms, encryption state and source hashes. Compression tests cover actual byte counts, decoded page streams, matching native rendered pixels on the first saved page, title, rotation, annotation counts/forms, refusal of encrypted input, no-reduction output suppression, cancellation during work, locked/existing output, Unicode/long paths and simulated write failure cleanup. Preview tests exercise 120 pages, cache eviction, estimated 24 MiB/16-entry bounds, ten reopen/clear cycles and cancellation without cached output.
 - Synthetic compression matrix (one observed local run; byte counts can vary slightly with PDF timestamps). These are test results, not expected savings for other documents:
 
 | Input | Original bytes | Trial/output bytes | Saved | Result |
@@ -45,6 +45,7 @@ The real screenshot in `docs/screenshots/organize.png` is a crop of the native a
 | Text-heavy, 3 pages | 57,990 | 40,648 | 29.91% | Saved/reopened; decoded page content retained |
 | Scanned/image-only, 3 pages | 4,142 | 4,910 | -18.54% | No output saved; encoded images already compact |
 | Mixed text/images, 3 pages | 58,666 | 41,300 | 29.60% | Saved/reopened |
+| Image-heavy with text, 20 pages | 2,580,041 | 2,460,182 | 4.65% | Saved/reopened; native rendered pixels match |
 | Already optimized, 3 pages | 39,921 | 40,640 | -1.80% | No output saved |
 | Text-heavy, 120 pages | 874,961 | 153,162 | 82.49% | Saved/reopened; 120 pages retained |
 | Landscape/rotated, 3 pages | 58,020 | 40,674 | 29.90% | Saved/reopened; rotations/content retained |

@@ -22,17 +22,19 @@ public sealed class SecurityCompressionTests : IDisposable
     {
         var path = At(kind + ".pdf"); using var doc = new PdfDocument(); doc.Info.Title = "Synthetic validation";
         doc.Options.CompressContentStreams = kind == "optimized";
-        var count = kind == "large" ? 120 : 3;
+        var count = kind == "large" ? 120 : kind == "heavy" ? 20 : 3;
         for (var i = 0; i < count; i++)
         {
             var page = doc.AddPage(); if (kind == "rotated") { page.Width = XUnit.FromPoint(840); page.Height = XUnit.FromPoint(595); page.Rotate = 90; }
             using (var g = XGraphics.FromPdfPage(page))
             {
                 if (kind != "image") for (var n = 0; n < 150; n++) g.DrawString("Synthetic searchable text " + n, new XFont("Arial", 10), XBrushes.Navy, 20, 20 + n % 70 * 10);
-                if (kind is "image" or "mixed")
+                if (kind is "image" or "mixed" or "heavy")
                 {
-                    var pixels = new byte[320 * 240 * 3]; Array.Fill(pixels, (byte)122);
-                    var bitmap = BitmapSource.Create(320, 240, 96, 96, PixelFormats.Rgb24, null, pixels, 960);
+                    var width = kind == "heavy" ? 800 : 320; var height = kind == "heavy" ? 1000 : 240;
+                    var pixels = new byte[width * height * 3];
+                    if (kind == "heavy") new Random(813).NextBytes(pixels); else Array.Fill(pixels, (byte)122);
+                    var bitmap = BitmapSource.Create(width, height, 96, 96, PixelFormats.Rgb24, null, pixels, width * 3);
                     var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap)); using var bytes = new MemoryStream(); encoder.Save(bytes); bytes.Position = 0;
                     using var image = XImage.FromStream(bytes); g.DrawImage(image, 20, 20, 300, 200);
                 }
@@ -89,7 +91,7 @@ public sealed class SecurityCompressionTests : IDisposable
         await Assert.ThrowsAsync<PdfOperationException>(() => engine.UnlockAsync(input, "anything", At("bad.pdf"), CollisionPolicy.Cancel));
         await Assert.ThrowsAsync<PdfOperationException>(() => engine.UnlockAsync(input, "", At("bad.pdf"), CollisionPolicy.Cancel));
     }
-    [Theory][InlineData("text")][InlineData("image")][InlineData("mixed")][InlineData("optimized")][InlineData("large")][InlineData("rotated")][InlineData("form")]
+    [Theory][InlineData("text")][InlineData("image")][InlineData("mixed")][InlineData("heavy")][InlineData("optimized")][InlineData("large")][InlineData("rotated")][InlineData("form")]
     public async Task CompressionMeasuresSavingsAndPreservesContent(string kind)
     {
         var source = Fixture(kind); var hash = Hash(source); var result = await engine.CompressAsync(new(source), At("output.pdf"), CollisionPolicy.Cancel);
@@ -101,9 +103,16 @@ public sealed class SecurityCompressionTests : IDisposable
             Assert.Equal(before.PageCount, after.PageCount); Assert.Equal(before.Info.Title, after.Info.Title);
             for (var p = 0; p < before.PageCount; p++) { Assert.Equal(PageContent(before, p), PageContent(after, p)); Assert.Equal(before.Pages[p].Rotate, after.Pages[p].Rotate); Assert.Equal(before.Pages[p].Elements.GetArray("/Annots")!.Elements.Count, after.Pages[p].Elements.GetArray("/Annots")!.Elements.Count); }
             Assert.Equal(before.Internals.Catalog.Elements.ContainsKey("/AcroForm"), after.Internals.Catalog.Elements.ContainsKey("/AcroForm"));
+            var previews = new ThumbnailService();
+            Assert.Equal(Pixels(await previews.GetAsync(new(source), 1)), Pixels(await previews.GetAsync(new(result.Path), 1)));
         }
         else { Assert.True(result.OutputBytes >= result.OriginalBytes); Assert.False(File.Exists(At("output.pdf"))); }
         Assert.Equal(hash, Hash(source)); Assert.Empty(Directory.GetFiles(dir, "*.tmp"));
+    }
+    private static byte[] Pixels(BitmapSource source)
+    {
+        var bitmap = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+        var bytes = new byte[bitmap.PixelWidth * bitmap.PixelHeight * 4]; bitmap.CopyPixels(bytes, bitmap.PixelWidth * 4, 0); return bytes;
     }
     [Fact] public async Task OutputSafetyUnicodeCancellationAndLockedDestination()
     {
