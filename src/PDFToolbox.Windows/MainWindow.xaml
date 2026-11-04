@@ -18,6 +18,7 @@
      <Button Content="Rotate Pages" Tag="Rotate" Click="ToolClick" HorizontalContentAlignment="Left"/>
      <TextBlock Text="CONVERT / EDIT" Style="{StaticResource MutedText}" FontSize="11" Margin="0,12,0,8"/>
      <Button Content="Images to PDF" Tag="Images" Click="ToolClick" HorizontalContentAlignment="Left"/>
+     <Button Content="PDF to Excel / CSV" Tag="Tables" Click="ToolClick" HorizontalContentAlignment="Left"/>
      <Button Content="PDF to Images" Tag="Raster" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Watermark" Tag="Watermark" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Page Numbers" Tag="Numbers" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Metadata" Tag="Metadata" Click="ToolClick" HorizontalContentAlignment="Left"/>
      <TextBlock Text="SECURITY / OPTIMIZE" Style="{StaticResource MutedText}" FontSize="11" Margin="0,12,0,8"/>
      <Button Content="Protect PDF" Tag="Protect" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Unlock PDF" Tag="Unlock" Click="ToolClick" HorizontalContentAlignment="Left"/><Button Content="Compress PDF" Tag="Compress" Click="ToolClick" HorizontalContentAlignment="Left"/><TextBlock Text="General batch · not implemented" Style="{StaticResource MutedText}" FontSize="12"/>
@@ -33,6 +34,7 @@
      <Border Style="{StaticResource Card}" BorderBrush="{DynamicResource Accent}" BorderThickness="1" Padding="28" Margin="0,0,0,20"><StackPanel><TextBlock Text="Drop PDFs here" FontSize="23" FontWeight="SemiBold"/><TextBlock Text="One PDF opens the page workspace. Multiple PDFs create a merge queue.&#10;You can also use Open files or Ctrl+O." Style="{StaticResource MutedText}" Margin="0,12,0,0"/></StackPanel></Border>
      <TextBlock Text="Practical tools, one local workspace" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,14"/>
      <WrapPanel>
+      <Button Width="238" Height="92" Tag="Tables" Click="ToolClick"><StackPanel><TextBlock Text="PDF to Excel / CSV" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Find tables, review, export a copy" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
       <Button Width="238" Height="92" Tag="Merge" Click="ToolClick"><StackPanel><TextBlock Text="Merge PDFs" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Arrange files into one document" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
       <Button Width="238" Height="92" Tag="Split" Click="ToolClick"><StackPanel><TextBlock Text="Split PDF" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Ranges, pages or fixed-size parts" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>
       <Button Width="238" Height="92" Tag="Organize" Click="ToolClick"><StackPanel><TextBlock Text="Organize Pages" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="Reorder, rotate, duplicate, delete" Style="{StaticResource MutedText}" FontSize="12"/></StackPanel></Button>

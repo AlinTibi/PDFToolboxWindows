@@ -28,6 +28,18 @@ Actual Release screenshots: [Home](docs/screenshots/home.png) · [Watermark prev
 
 General batch processing remains explicitly disabled. WEBP is not supported.
 
+## Unreleased Windows development: PDF to Excel / CSV
+
+The `feature/pdf-to-spreadsheet` branch adds table extraction inspired by the Android application. This is not part of the public v1.0.0 package. PDF-to-image export already exists on Windows and is retained.
+
+Choose **PDF to Excel / CSV**, open a text-based PDF, optionally select page ranges, then **Find tables**. Review each table and acknowledge the warnings before exporting. The preview shows the first 200 rows of each table; export includes all detected rows. XLSX produces one sheet per table and stores every cell as text to preserve identifiers, leading zeros and long numbers. CSV produces one UTF-8 BOM file per table; optional formula-risk protection prefixes cells beginning with `=`, `+`, `-` or `@` (after whitespace) with an apostrophe and therefore changes their text. Spreadsheet applications can still reinterpret CSV data during import.
+
+No OCR is included. Pages with insufficient selectable text are reported. Layout detection is heuristic, not guaranteed reconstruction: wrapped/spanning/incomplete rows are flagged and all tables need review against the source. Joining matching tables on consecutive pages is explicit opt-in; repeated headers are retained. Sources are protected by the existing staged-output/identity checks, and existing outputs are renamed rather than replaced. Completed CSV files remain listed if a later output fails or is cancelled.
+
+Preview limits: 256 columns per table, 1,000 tables, 100,000 rows, 1,000,000 cells, 10,000,000 extracted cell characters, 200,000 glyphs per page and 2,000,000 glyphs per scan. XLSX refuses cells above Excel's 32,767-character limit. Encrypted, known signed and interactive-form inputs retain the existing conservative restrictions. Smaller page ranges may be needed for complex PDFs.
+
+This development change has been compiled, but automated and end-to-end tests have not been run for it. Do not interpret compilation as release validation.
+
 Protect uses the same password for opening and owner access, with no artificial permission restrictions. Enter and confirm 1–32 printable ASCII characters; incompatible/longer passwords are rejected rather than silently truncated. The UI can show/hide the password. Unlock is password-based only: no cracking, bypass or cloud service. Unsupported security models fail without saving a final output. Encryption protects content confidentiality; it does not identify or authenticate the document author.
 
 Compression has one implemented mode, not cosmetic presets. It compresses eligible unfiltered PDF streams with Flate and uses PDFsharp's content-stream compression. It does not rasterize pages, downsample images, recompress JPEGs or remove metadata/forms/annotations. Already-compressed/scanned PDFs may not shrink. Actual output is measured before finalization; an equal/larger trial is discarded. PDFsharp can update its Producer information during rewriting. Keep the original and inspect the copy; advanced document preservation is not universally guaranteed.
