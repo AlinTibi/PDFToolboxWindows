@@ -1,4 +1,15 @@
-# PDF Toolbox v1.0.0
+# PDF Toolbox v1.1.0
+
+- Adds local PDF-to-Excel/CSV table extraction from selectable text, page-range selection and table previews.
+- Exports one XLSX worksheet per table with text cells, preserving leading zeros and long identifiers. CSV supports optional apostrophe protection for formula-like cells; spreadsheet import can still reinterpret values.
+- Reports pages without sufficient selectable text; OCR is not included. Layout inference requires review. Consecutive-page joining is opt-in and retains repeated headers.
+- Reuses source identity checks, staged writes and separate-copy export. Existing table outputs are renamed; successful CSV parts remain reported if a later part fails or is cancelled.
+- Adds regression coverage for extraction, text preservation, OOXML structure, CSV escaping, failure cleanup and cancellation.
+- Updates the transitive PKCS cryptography dependency to the patched 8.0.2 release.
+
+Windows 10 version 2004 or later / Windows 11 x64. Self-contained portable ZIP; no separate .NET runtime or WebView2 is required. Offline processing, no accounts, uploads, telemetry or automatic downloads. Executable is not Authenticode signed. Existing PDF feature-preservation limitations remain; this is not OCR or direct PDF text editing.
+
+## Previous release: v1.0.0
 
 PDF Toolbox is a local Windows x64 utility, distributed as a self-contained portable ZIP. Extract the entire package and run PDFToolbox.exe; no separate .NET runtime or WebView2 installation is required.
 

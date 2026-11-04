@@ -26,8 +26,10 @@ public sealed partial class PdfService
             if (letters.Count(l => !string.IsNullOrWhiteSpace(l.Value)) < 8) withoutText.Add(pages[i]);
             else
             {
-                var glyphs = letters.Select(l => new TableGlyph(l.Value, l.BoundingBox.Left,
-                    page.Height - l.StartBaseLine.Y, l.BoundingBox.Width, Math.Max(1, l.PointSize))).ToArray();
+                // Use text advances, not ink bounding boxes: narrow glyphs otherwise acquire
+                // artificial spaces (for example 00123 -> 00 1 23).
+                var glyphs = letters.Select(l => new TableGlyph(l.Value, l.StartBaseLine.X,
+                    page.Height - l.StartBaseLine.Y, Math.Max(l.Width, l.EndBaseLine.X - l.StartBaseLine.X), Math.Max(1, l.PointSize))).ToArray();
                 foreach (var table in TableDetection.Detect(pages[i], glyphs))
                 {
                     tables.Add(table); rows += table.Rows.Length; cells += (long)table.Rows.Length * table.ColumnCount;

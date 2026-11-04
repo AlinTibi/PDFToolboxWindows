@@ -2,7 +2,7 @@
 
 **PDF tools that stay on your device**
 
-An independent ALMARFELD Windows desktop project. Open PDFs, review page choices and export a new copy, entirely on your computer. PDF Toolbox v1.0.0 runs from a self-contained portable ZIP.
+An independent ALMARFELD Windows desktop project. Open PDFs, review page choices and export a new copy, entirely on your computer. PDF Toolbox v1.1.0 runs from a self-contained portable ZIP.
 
 ![PDF Toolbox for Windows with synthetic pages](docs/screenshots/organize.png)
 
@@ -20,6 +20,7 @@ Actual Release screenshots: [Home](docs/screenshots/home.png) · [Watermark prev
 | Images to PDF | JPG/JPEG, PNG and BMP; A4/Letter, landscape, margins, Fit/Fill and JPEG quality. Source image preview. |
 | Metadata | Inspect document information; edit Title, Author, Subject, Keywords and Creator in a copy. Producer is library-controlled. |
 | PDF to Images | PNG/JPEG, all pages/ranges/highlighted pages, 36–600 DPI, JPEG quality, deterministic source-page filenames and per-page results. |
+| PDF to Excel / CSV | Find tables in selectable PDF text, preview them, choose pages and export XLSX (text cells) or UTF-8 BOM CSV copies. No OCR. |
 | Watermark | Text or PNG/JPEG image; opacity, rotation, nine positions, offsets and image scale. Selected-page preview uses the export drawing code. |
 | Page Numbers | All pages or ranges, starting number, prefix/suffix, four formats, six positions, font size/margin and excluding initial source pages. |
 | Protect PDF | Password-protect a new copy with verified PDF 1.6 AES-128 encryption. |
@@ -28,9 +29,9 @@ Actual Release screenshots: [Home](docs/screenshots/home.png) · [Watermark prev
 
 General batch processing remains explicitly disabled. WEBP is not supported.
 
-## Unreleased Windows development: PDF to Excel / CSV
+## PDF to Excel / CSV (v1.1.0)
 
-The `feature/pdf-to-spreadsheet` branch adds table extraction inspired by the Android application. This is not part of the public v1.0.0 package. PDF-to-image export already exists on Windows and is retained.
+Version 1.1.0 adds table extraction inspired by the Android application. PDF-to-image export already exists on Windows and is retained.
 
 Choose **PDF to Excel / CSV**, open a text-based PDF, optionally select page ranges, then **Find tables**. Review each table and acknowledge the warnings before exporting. The preview shows the first 200 rows of each table; export includes all detected rows. XLSX produces one sheet per table and stores every cell as text to preserve identifiers, leading zeros and long numbers. CSV produces one UTF-8 BOM file per table; optional formula-risk protection prefixes cells beginning with `=`, `+`, `-` or `@` (after whitespace) with an apostrophe and therefore changes their text. Spreadsheet applications can still reinterpret CSV data during import.
 
@@ -38,7 +39,7 @@ No OCR is included. Pages with insufficient selectable text are reported. Layout
 
 Preview limits: 256 columns per table, 1,000 tables, 100,000 rows, 1,000,000 cells, 10,000,000 extracted cell characters, 200,000 glyphs per page and 2,000,000 glyphs per scan. XLSX refuses cells above Excel's 32,767-character limit. Encrypted, known signed and interactive-form inputs retain the existing conservative restrictions. Smaller page ranges may be needed for complex PDFs.
 
-This development change has been compiled, but automated and end-to-end tests have not been run for it. Do not interpret compilation as release validation.
+See the validation records in docs/testing.md for the checks performed and remaining platform limitations.
 
 Protect uses the same password for opening and owner access, with no artificial permission restrictions. Enter and confirm 1–32 printable ASCII characters; incompatible/longer passwords are rejected rather than silently truncated. The UI can show/hide the password. Unlock is password-based only: no cracking, bypass or cloud service. Unsupported security models fail without saving a final output. Encryption protects content confidentiality; it does not identify or authenticate the document author.
 

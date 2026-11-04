@@ -1,4 +1,4 @@
-param([string]$PackagePath='artifacts/windows/PDFToolbox', [string]$ExpectedVersion='1.0.0')
+param([string]$PackagePath='artifacts/windows/PDFToolbox', [string]$ExpectedVersion='1.1.0')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 $package=if([IO.Path]::IsPathRooted($PackagePath)) {$PackagePath} else {Join-Path $root $PackagePath}

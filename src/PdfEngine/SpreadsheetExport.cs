@@ -29,7 +29,7 @@ public static class SpreadsheetExport
         void Xml(string name, Action<XmlWriter> write)
         {
             using var stream = zip.CreateEntry(name, CompressionLevel.Optimal).Open();
-            using var writer = XmlWriter.Create(stream, new XmlWriterSettings { Encoding = new UTF8Encoding(false), CloseOutput = false });
+            using var writer = XmlWriter.Create(stream, new XmlWriterSettings { Encoding = new UTF8Encoding(false), CloseOutput = false, NewLineHandling = NewLineHandling.Entitize });
             writer.WriteStartDocument(); write(writer); writer.WriteEndDocument();
         }
         Xml("[Content_Types].xml", w =>
@@ -77,6 +77,7 @@ public static class SpreadsheetExport
                     {
                         var value = table.Rows[r][c];
                         if (value.Length > 32767) throw new PdfOperationException("Limit", "A cell exceeds Excel's 32,767-character limit. Nothing was exported.");
+                        XmlConvert.VerifyXmlChars(value);
                         w.WriteStartElement("c", SpreadsheetNs); w.WriteAttributeString("r", Column(c) + (r + 1)); w.WriteAttributeString("t", "inlineStr");
                         w.WriteStartElement("is", SpreadsheetNs); w.WriteStartElement("t", SpreadsheetNs);
                         w.WriteAttributeString("xml", "space", "http://www.w3.org/XML/1998/namespace", "preserve");
