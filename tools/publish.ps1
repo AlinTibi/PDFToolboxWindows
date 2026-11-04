@@ -9,11 +9,11 @@ try {
  if($LASTEXITCODE) {throw 'Release clean failed.'}
  dotnet publish src/PDFToolbox.Windows -c Release --no-restore -p:DebugType=None -p:DebugSymbols=false -o $Output
  if($LASTEXITCODE) {throw 'Publish failed.'}
- foreach($file in @('LICENSE','THIRD-PARTY-NOTICES.txt','Windows-SDK-License.rtf')) {
+ foreach($file in @('LICENSE','THIRD-PARTY-NOTICES.txt','Windows-SDK-License.rtf','RELEASE_NOTES.md','SECURITY.md')) {
   Copy-Item -LiteralPath $file -Destination $Output
  }
  $instructions=@'
-PDF Toolbox v1.0.0 — ALMARFELD
+PDF Toolbox v1.1.0 — ALMARFELD
 
 Extract the whole ZIP and keep all adjacent runtime files/folders together.
 Run PDFToolbox.exe on Windows 10 version 2004 or later / Windows 11 x64.
@@ -24,6 +24,12 @@ Open files, choose a tool, review options and export a new copy.
 Processing stays on your device. No uploads, accounts, ads or automatic downloads.
 Keep originals and inspect exported copies; advanced PDF preservation is limited.
 Lossless compression may not shrink an already optimized PDF.
+
+PDF to Excel/CSV: find tables in selectable text, inspect the preview and
+acknowledge the review before exporting. There is no OCR. Layout detection is
+heuristic; joined tables retain repeated headers. XLSX stores text cells.
+CSV formula protection is optional and adds apostrophes; importing CSV into a
+spreadsheet can still change how identifiers and other values are interpreted.
 
 The executable is not Authenticode signed. Windows may show a reputation warning.
 Use official release links and optionally verify the published SHA-256.

@@ -1,8 +1,8 @@
 # PDF dependencies and licenses
 
-## Unreleased table extraction
+## Table extraction (v1.1.0)
 
-The Windows development branch pins **PdfPig 0.1.16** (Apache-2.0) for local, positioned-text extraction. It does not add OCR, a cloud service or a runtime download. XLSX output uses .NET XML/ZIP APIs; Excel and Office are not required. Source: [PdfPig](https://github.com/UglyToad/PdfPig), [pinned package](https://www.nuget.org/packages/PdfPig/0.1.16). Its full license and bundled third-party notices are included in `THIRD-PARTY-NOTICES.txt`. Package lock files are updated for the engine, desktop application and existing test project; no new test execution is claimed.
+Version 1.1.0 pins **PdfPig 0.1.16** (Apache-2.0) for local, positioned-text extraction. It does not add OCR, a cloud service or a runtime download. XLSX output uses .NET XML/ZIP APIs; Excel and Office are not required. Source: [PdfPig](https://github.com/UglyToad/PdfPig), [pinned package](https://www.nuget.org/packages/PdfPig/0.1.16). Its full license and bundled third-party notices are included in `THIRD-PARTY-NOTICES.txt`. Package lock files are updated for the engine, desktop application and existing test project.
 
 Reviewed before implementation. The Windows edition does not reuse Android advertising or analytics dependencies.
 
