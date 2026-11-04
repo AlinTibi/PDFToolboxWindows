@@ -15,6 +15,11 @@
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
         }
       },
+      "PdfPig": {
+        "type": "Transitive",
+        "resolved": "0.1.16",
+        "contentHash": "qQcbsNMYVY+K5ELptax2S8thNMk0+rSQq3H/KdYj3LLcko8yTCz8y5KIvsKxIyAuTN0ZYNnfsZkM+0EvxTwHVA=="
+      },
       "PDFsharp-WPF": {
         "type": "Transitive",
         "resolved": "6.2.4",
@@ -32,7 +37,8 @@
       "pdfengine": {
         "type": "Project",
         "dependencies": {
-          "PDFsharp-WPF": "[6.2.4, )"
+          "PDFsharp-WPF": "[6.2.4, )",
+          "PdfPig": "[0.1.16, )"
         }
       }
     },

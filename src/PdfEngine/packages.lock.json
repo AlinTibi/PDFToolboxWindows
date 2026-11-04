@@ -2,6 +2,12 @@
   "version": 1,
   "dependencies": {
     "net8.0-windows10.0.19041": {
+      "PdfPig": {
+        "type": "Direct",
+        "requested": "[0.1.16, )",
+        "resolved": "0.1.16",
+        "contentHash": "qQcbsNMYVY+K5ELptax2S8thNMk0+rSQq3H/KdYj3LLcko8yTCz8y5KIvsKxIyAuTN0ZYNnfsZkM+0EvxTwHVA=="
+      },
       "PDFsharp-WPF": {
         "type": "Direct",
         "requested": "[6.2.4, )",
