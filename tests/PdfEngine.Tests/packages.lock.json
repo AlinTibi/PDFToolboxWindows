@@ -29,6 +29,14 @@
         "resolved": "3.0.2",
         "contentHash": "oXbusR6iPq0xlqoikjdLvzh+wQDkMv9If58myz9MEzldS4nIcp442Btgs2sWbYWV+caEluMe2pQCZ0hUZgPiow=="
       },
+      "Microsoft.Bcl.Cryptography": {
+        "type": "Transitive",
+        "resolved": "10.0.15",
+        "contentHash": "hJw6ERV3MBPjI/nhGPAUQMLBhc0xu2UPxcUuKPgrhsGiV0uKEcZknXICvo14PL+v37U9SdZFCUYo19qbkvLg3A==",
+        "dependencies": {
+          "System.Formats.Asn1": "10.0.15"
+        }
+      },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
         "resolved": "17.12.0",
@@ -83,6 +91,11 @@
           "System.Security.Cryptography.Pkcs": "8.0.1"
         }
       },
+      "System.Formats.Asn1": {
+        "type": "Transitive",
+        "resolved": "10.0.15",
+        "contentHash": "v74r4sIPf6jj80nBIISv4duxjrEvuyAOPQFHb7EePO7elvjfjGsdMpG8lbTm1nG+osyvXLg80A9qsygaTfsjrQ=="
+      },
       "System.Reflection.Metadata": {
         "type": "Transitive",
         "resolved": "1.6.0",
@@ -90,8 +103,12 @@
       },
       "System.Security.Cryptography.Pkcs": {
         "type": "Transitive",
-        "resolved": "8.0.2",
-        "contentHash": "VWACYq0JGxi9sw3TonSSV4B2MfhYk5nhgOtp9wbrt5NFOtUetFqHkMZylcCwPX+117cBJH5EnIzIy6X4OKn/kA=="
+        "resolved": "10.0.15",
+        "contentHash": "4jEv/lXDuQkh60lPU3hlwASErXdv1ZMKmsxVuBfZWiVKT5Q2QGo58kTa6rN519+PU+m4Hsj1m3yT8fN+Xw0XZw==",
+        "dependencies": {
+          "Microsoft.Bcl.Cryptography": "10.0.15",
+          "System.Formats.Asn1": "10.0.15"
+        }
       },
       "xunit.abstractions": {
         "type": "Transitive",
@@ -138,7 +155,7 @@
         "dependencies": {
           "PDFsharp-WPF": "[6.2.4, )",
           "PdfPig": "[0.1.16, )",
-          "System.Security.Cryptography.Pkcs": "[8.0.2, )"
+          "System.Security.Cryptography.Pkcs": "[10.0.15, )"
         }
       }
     }

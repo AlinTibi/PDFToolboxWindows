@@ -3,6 +3,6 @@
   <ItemGroup>
     <PackageReference Include="PDFsharp-WPF" Version="6.2.4" />
     <PackageReference Include="PdfPig" Version="0.1.16" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="11.0.0" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.15" />
   </ItemGroup>
 </Project>

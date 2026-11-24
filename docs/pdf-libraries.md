@@ -27,7 +27,7 @@ Runtime package license metadata was checked after restore:
 | --- | --- | --- |
 | Microsoft.Extensions.Logging.Abstractions | 8.0.3 | MIT |
 | Microsoft.Extensions.DependencyInjection.Abstractions | 8.0.2 | MIT |
-| System.Security.Cryptography.Pkcs | 8.0.1 | MIT |
+| System.Security.Cryptography.Pkcs, Microsoft.Bcl.Cryptography, System.Formats.Asn1 | 10.0.15 | MIT |
 | Microsoft.NETCore.App.Runtime.win-x64 | 8.0.31 in local build | MIT, with upstream third-party notices |
 | Microsoft.WindowsDesktop.App.Runtime.win-x64 | 8.0.31 in local build | MIT, with upstream third-party notices |
 | WinRT.Runtime / CsWinRT | 2.2.0.48161 assembly | MIT |
